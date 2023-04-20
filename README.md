@@ -1,2 +1,2 @@
-# JabraDirect-DisableUpdateNotification
+# JabraDirect-DisableUpdateNotification for all Users
  
