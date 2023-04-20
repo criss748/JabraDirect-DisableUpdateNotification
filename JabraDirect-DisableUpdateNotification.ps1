@@ -87,11 +87,9 @@ $allusers=Get-Content -Path .\userlist2.txt |Where-Object {($_ -notlike 'Public'
 
 
 #Run
-foreach ($user in $allusers)
-	{
+foreach ($user in $allusers) {
 	$path="C:\Users\$user\AppData\Roaming\Jabra Direct\config.json"
-	If (Test-Path("$path")) 
-		{
+	If (Test-Path("$path")) {
 		Write-Output "-- Found the Config File,by $user applying changes"
 		$a = Get-Content "$path" -Raw | ConvertFrom-Json
 
@@ -103,35 +101,33 @@ foreach ($user in $allusers)
 
 	        $a | ConvertTo-Json -Depth 3 | Format-Json | Set-Content "$path" -Encoding UTF8
         	((Get-Content "$path") -join "`n") + "`n" | Set-Content -NoNewline "$path"
-		} else 
-	{
-        Write-Output "-- Didn't find the Config File"
-        #If (Test-path("C:\Program Files (x86)\Jabra\Direct4\jabra-direct.exe")) {
-           #Write-Output "--- But Jabra Direct is installed, creating a Config File"
+	} else {
+        	Write-Output "-- Didn't find the Config File"
+        	#If (Test-path("C:\Program Files (x86)\Jabra\Direct4\jabra-direct.exe")) {
+           		#Write-Output "--- But Jabra Direct is installed, creating a Config File"
 	    
-	    $dir="C:\Users\$user\AppData\Roaming\Jabra Direct"
-            If (-Not (Test-Path("$dir"))) {
-                New-Item "$dir" -type directory -Force | out-null
-                Write-Output "-- Created '$dir'"
-            } 
-            $ConfigurationRequest = @{
-                DirectShowNotification = @{
-                    key = "DirectShowNotification"
-                    value = $false
-                    locked = $true
-                }
-                EnableFeedback = @{
-                    key = "EnableFeedback"
-                    value = $false
-                    locked = $true
-                }   
-            }
-            $ConfigurationRequest | ConvertTo-Json -depth 100 | Set-Content "$path"
-            $a = Get-Content "$path" -Encoding UTF8 | ConvertFrom-Json
-            $a | ConvertTo-Json -Depth 3 | Format-Json | Set-Content "$path" -Encoding UTF8
-            ((Get-Content "$path") -join "`n") + "`n" | Set-Content -NoNewline "$path"
-        #}
-        
-    }
+	    	$dir="C:\Users\$user\AppData\Roaming\Jabra Direct"
+            	If (-Not (Test-Path("$dir"))) {
+                	New-Item "$dir" -type directory -Force | out-null
+                	Write-Output "-- Created '$dir'"
+            	} 
+            	$ConfigurationRequest = @{
+                	DirectShowNotification = @{
+                    		key = "DirectShowNotification"
+                    		value = $false
+                    		locked = $true
+                	}
+                	EnableFeedback = @{
+                    	key = "EnableFeedback"
+                    	value = $false
+                    	locked = $true
+	                }
+		}
+        	$ConfigurationRequest | ConvertTo-Json -depth 100 | Set-Content "$path"
+        	$a = Get-Content "$path" -Encoding UTF8 | ConvertFrom-Json
+        	$a | ConvertTo-Json -Depth 3 | Format-Json | Set-Content "$path" -Encoding UTF8
+        	((Get-Content "$path") -join "`n") + "`n" | Set-Content -NoNewline "$path"
+        	#}
+	}
 }
 del userlist* -force
