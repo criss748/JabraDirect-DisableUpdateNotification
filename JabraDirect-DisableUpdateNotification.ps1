@@ -69,35 +69,50 @@ Function Format-Json {
 }
 
 # ---------------------------------------------------------------------------------
-# NAME: JabraDirect-DisableUpdateNotification
+# NAME: JabraDirect-DisableUpdateNotification-All Users
 # 
 # AUTHOR: Ellis Barrett - A365
-# 
-# CREATION DATE: 14/07/2022
+# FORK A: criss748 
 #
+# CREATION DATE: 14/07/2022
+# FORK DATE: 20/04/2023
 # ---------------------------------------------------------------------------------
 
-Write-Output "- Configure Jabra Direct"
-$json = "$([Environment]::GetFolderPath("ApplicationData"))\Jabra Direct\config.json"
-if (Test-path("$json")) {
-        Write-Output "-- Found the Config File, applying changes"
-        $a = Get-Content "$json" -Raw | ConvertFrom-Json
+#Get Userlist
+$allusers=dir c:\users -Directory -Attributes directory,hidden |ft name -HideTableHeaders > userlist.txt
 
-        $a.DirectShowNotification.value = $false
-        $a.DirectShowNotification.locked = $true
+#Clean list
+Get-Content -Path .\userlist.txt | ForEach-Object {$_ -Replace ' ', ''} |where {$_ -ne ""} | Set-Content -Path .\userlist2.txt
+$allusers=Get-Content -Path .\userlist2.txt |Where-Object {($_ -notlike 'Public') -and ($_ -notlike 'AllUsers') -and ($_ -notlike 'DefaultUser')}
 
-        $a.EnableFeedback.value = $false
-        $a.EnableFeedback.locked = $true
 
-        $a | ConvertTo-Json -Depth 3 | Format-Json | Set-Content "$json" -Encoding UTF8
-        ((Get-Content "$json") -join "`n") + "`n" | Set-Content -NoNewline "$json"
-    } else {
+#Run
+foreach ($user in $allusers)
+	{
+	$path="C:\Users\$user\AppData\Roaming\Jabra Direct\config.json"
+	If (Test-Path("$path")) 
+		{
+		Write-Output "-- Found the Config File,by $user applying changes"
+		$a = Get-Content "$path" -Raw | ConvertFrom-Json
+
+       		$a.DirectShowNotification.value = $false
+       		$a.DirectShowNotification.locked = $true
+
+	        $a.EnableFeedback.value = $false
+        	$a.EnableFeedback.locked = $true
+
+	        $a | ConvertTo-Json -Depth 3 | Format-Json | Set-Content "$path" -Encoding UTF8
+        	((Get-Content "$path") -join "`n") + "`n" | Set-Content -NoNewline "$path"
+		} else 
+	{
         Write-Output "-- Didn't find the Config File"
         #If (Test-path("C:\Program Files (x86)\Jabra\Direct4\jabra-direct.exe")) {
            #Write-Output "--- But Jabra Direct is installed, creating a Config File"
-            If (-Not (Test-Path("$([Environment]::GetFolderPath("ApplicationData"))\Jabra Direct"))) {
-                New-Item "$([Environment]::GetFolderPath("ApplicationData"))\Jabra Direct" -type directory -Force | out-null
-                Write-Output "-- Created '$([Environment]::GetFolderPath("ApplicationData"))\Jabra Direct'"
+	    
+	    $dir="C:\Users\$user\AppData\Roaming\Jabra Direct"
+            If (-Not (Test-Path("$dir"))) {
+                New-Item "$dir" -type directory -Force | out-null
+                Write-Output "-- Created '$dir'"
             } 
             $ConfigurationRequest = @{
                 DirectShowNotification = @{
@@ -111,11 +126,12 @@ if (Test-path("$json")) {
                     locked = $true
                 }   
             }
-            $ConfigurationRequest | ConvertTo-Json -depth 100 | Set-Content "$json"
-            $a = Get-Content "$json" -Encoding UTF8 | ConvertFrom-Json
-            $a | ConvertTo-Json -Depth 3 | Format-Json | Set-Content "$json" -Encoding UTF8
-            ((Get-Content "$json") -join "`n") + "`n" | Set-Content -NoNewline "$json"
+            $ConfigurationRequest | ConvertTo-Json -depth 100 | Set-Content "$path"
+            $a = Get-Content "$path" -Encoding UTF8 | ConvertFrom-Json
+            $a | ConvertTo-Json -Depth 3 | Format-Json | Set-Content "$path" -Encoding UTF8
+            ((Get-Content "$path") -join "`n") + "`n" | Set-Content -NoNewline "$path"
         #}
         
     }
-
+}
+del userlist* -force
