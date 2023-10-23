@@ -88,7 +88,7 @@ $allusers=Get-Content -Path .\userlist2.txt |Where-Object {($_ -notlike 'Public'
 
 #Run
 foreach ($user in $allusers) {
-	$path="C:\Users\$user\AppData\Roaming\Jabra Direct\config.json"
+	$path="C:\Users\$user\AppData\Roaming\Jabra Direct\jabradirectconfig.json"
 	If (Test-Path("$path")) {
 		Write-Output "-- Found the Config File,by $user applying changes"
 		$a = Get-Content "$path" -Raw | ConvertFrom-Json
